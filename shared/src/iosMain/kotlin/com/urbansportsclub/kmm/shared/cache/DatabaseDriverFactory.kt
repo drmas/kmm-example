@@ -1,5 +1,6 @@
 package com.urbansportsclub.kmm.shared.cache
 
+import com.squareup.sqldelight.drivers.native.NativeSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 
 actual class DatabaseDriverFactory {

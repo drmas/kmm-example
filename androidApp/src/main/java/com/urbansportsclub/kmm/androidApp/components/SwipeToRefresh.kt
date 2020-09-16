@@ -16,6 +16,7 @@ package com.urbansportsclub.kmm.androidApp.components
  * limitations under the License.
  */
 
+import android.util.Log
 import androidx.compose.foundation.Box
 import androidx.compose.foundation.layout.Stack
 import androidx.compose.foundation.layout.offsetPx
@@ -46,7 +47,8 @@ fun SwipeToRefreshLayout(
     // TODO (https://issuetracker.google.com/issues/164113834): This state->event trampoline is a
     //  workaround for a bug in the SwipableState API. It should be replaced with a correct solution
     //  when that bug closes.
-    onCommit(refreshingState) {
+        Log.d("Loading", "refresh state changed to ${refreshingState}")
+    onCommit() {
         state.animateTo(refreshingState)
     }
     // TODO (https://issuetracker.google.com/issues/164113834): Hoist state changes when bug is

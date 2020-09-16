@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.ui.tooling.preview.Preview
 import com.urbansportsclub.kmm.androidApp.components.RocketLaunchsListView
 import com.urbansportsclub.kmm.androidApp.components.SwipeToRefreshLayout
+import com.urbansportsclub.kmm.androidApp.data.sampleRocketLaunchs
+import com.urbansportsclub.kmm.androidApp.states.SpaceXViewModel
+import com.urbansportsclub.kmm.androidApp.states.UIState
 import com.urbansportsclub.kmm.shared.SpaceXSDK
 import com.urbansportsclub.kmm.shared.cache.DatabaseDriverFactory
-import com.urbansportsclub.kmm.shared.entity.Links
-import com.urbansportsclub.kmm.shared.entity.Rocket
-import com.urbansportsclub.kmm.shared.entity.RocketLaunch
 
 @Composable
 fun App(viewModel: SpaceXViewModel) {
@@ -38,29 +38,37 @@ fun App(viewModel: SpaceXViewModel) {
 @Composable
 fun ListWithLoading(viewModel: SpaceXViewModel) {
     val status = viewModel.state.observeAsState()
-    val rocketLaunchs = viewModel.rocketLaunchs.observeAsState(initial = listOf())
+    val rocketLaunchs = viewModel.rocketLaunchs.observeAsState()
+    val isEmpty = rocketLaunchs.value?.isEmpty() ?: false
     val isLoading = status.value is UIState.Loading
+    val hasError = status.value is UIState.Error
 
-    if (isLoading) {
-        Loading()
-    } else {
-        SwipeToRefreshLayout(
-            refreshingState = isLoading,
-            onRefresh = {
-                viewModel.loadLaunches(true)
-            },
-            refreshIndicator = {
-                Surface(elevation = 10.dp, shape = CircleShape) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .preferredSize(36.dp)
-                            .padding(6.dp),
-                        strokeWidth = 3.dp
-                    )
-                }
-            },
-        )
-        { RocketLaunchsListView(rocketLaunchs = rocketLaunchs) }
+    when {
+        hasError -> {
+            Text(text = (status.value as UIState.Error).error.message.orEmpty() )
+        }
+        isLoading && isEmpty -> {
+            Loading()
+        }
+        else -> {
+            SwipeToRefreshLayout(
+                refreshingState = isLoading,
+                onRefresh = {
+                    viewModel.loadLaunches(false)
+                },
+                refreshIndicator = {
+                    Surface(elevation = 10.dp, shape = CircleShape) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .preferredSize(36.dp)
+                                .padding(6.dp),
+                            strokeWidth = 3.dp
+                        )
+                    }
+                },
+            )
+            { RocketLaunchsListView(rocketLaunchs = rocketLaunchs) }
+        }
     }
 }
 
@@ -94,25 +102,7 @@ fun previewWithData() {
     val sdk = SpaceXSDK(DatabaseDriverFactory(context))
     val viewModel = SpaceXViewModel(sdk)
     viewModel.state.value = UIState.Loaded()
-    viewModel.rocketLaunchs.value = listOf(
-        RocketLaunch(
-            flightNumber = 100,
-            missionName = "To Mars",
-            launchYear = 2018,
-            launchDateUTC = "January 1, 2018, 00:00:00 UTC",
-            rocket = Rocket(
-                id = "123",
-                type = "SpaceShip",
-                name = "My Ship"
-            ),
-            links = Links(
-                missionPatchUrl = "",
-                articleUrl = ""
-            ),
-            details = "",
-            launchSuccess = null
-        )
-    )
+    viewModel.rocketLaunchs.value = sampleRocketLaunchs()
 
-    App(viewModel = viewModel)
+    App(viewModel =  viewModel)
 }

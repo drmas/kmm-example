@@ -1,6 +1,7 @@
-package com.urbansportsclub.kmm.androidApp
+package com.urbansportsclub.kmm.androidApp.states
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,7 +24,6 @@ class SpaceXViewModel(val sdk: SpaceXSDK) : ViewModel() {
     val rocketLaunchs = MutableLiveData(listOf<RocketLaunch>())
     val state = MutableLiveData<UIState>(UIState.Loading())
 
-
     fun loadLaunches(forceReload: Boolean) {
         state.value = UIState.Loading()
         mainScope.launch {
@@ -32,8 +32,10 @@ class SpaceXViewModel(val sdk: SpaceXSDK) : ViewModel() {
             }.onSuccess {
                 rocketLaunchs.value = it
                 state.value = UIState.Loaded()
+                Log.d("Loading", "Setting loading off in uistate")
             }.onFailure {
                 state.value = UIState.Error(it)
+                state.value = UIState.Loaded()
             }
         }
     }
