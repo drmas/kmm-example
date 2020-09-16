@@ -1,4 +1,4 @@
-# Kotlim Multiplatform Example
+# Kotlin Multiplatform Example
 
 An example project that uses Kotlin multiplatform to share the API and local cache layers of a mobile app between iOS and Android.
 
